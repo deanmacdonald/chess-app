@@ -3,6 +3,7 @@ use crate::bitboard::{Bitboard, bb};
 use crate::moves::MoveList;
 
 #[derive(Clone)]
+#[derive(Debug)]
 pub struct Board {
     /// 12 bitboards: white pawn..king, black pawn..king
     pub pieces: [Bitboard; 12],
