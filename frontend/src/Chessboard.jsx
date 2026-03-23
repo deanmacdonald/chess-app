@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./styles.css";
 
 const PIECES = {
@@ -6,42 +5,14 @@ const PIECES = {
   R: "♖", N: "♘", B: "♗", Q: "♕", K: "♔", P: "♙",
 };
 
-const START_POS = [
-  "rnbqkbnr",
-  "pppppppp",
-  "........",
-  "........",
-  "........",
-  "........",
-  "PPPPPPPP",
-  "RNBQKBNR"
-];
-
-export default function Chessboard() {
-  const [board, setBoard] = useState(START_POS.map(row => row.split("")));
-  const [selected, setSelected] = useState(null);
-
-  function handleSquareClick(file, rank) {
-    const id = `${file}${rank}`;
-
-    if (!selected) {
-      // Select a piece
-      if (board[7 - rank][file] !== ".") {
-        setSelected({ file, rank });
-      }
-      return;
-    }
-
-    // Move piece
-    const newBoard = board.map(row => [...row]);
-    const piece = newBoard[7 - selected.rank][selected.file];
-
-    newBoard[7 - selected.rank][selected.file] = ".";
-    newBoard[7 - rank][file] = piece;
-
-    setBoard(newBoard);
-    setSelected(null);
-  }
+export default function Chessboard({ position, selected, onSquareClick }) {
+  // Convert FEN → 2D array
+  const rows = position.split(" ")[0].split("/");
+  const board = rows.map((row) =>
+    row
+      .replace(/[1-8]/g, (n) => ".".repeat(parseInt(n)))
+      .split("")
+  );
 
   const squares = [];
   for (let rank = 7; rank >= 0; rank--) {
@@ -50,17 +21,19 @@ export default function Chessboard() {
       const pieceChar = board[7 - rank][file];
       const piece = pieceChar !== "." ? PIECES[pieceChar] : null;
 
+      const isSelected =
+        selected &&
+        selected.file === file &&
+        selected.rank === rank;
+
       squares.push(
         <div
           key={`${file}${rank}`}
           className={isDark ? "square dark" : "square light"}
-          onClick={() => handleSquareClick(file, rank)}
+          onClick={() => onSquareClick(file, rank)}
         >
           {piece && <div className="piece">{piece}</div>}
-          {selected &&
-            selected.file === file &&
-            selected.rank === rank &&
-            <div className="highlight" />}
+          {isSelected && <div className="highlight" />}
         </div>
       );
     }
