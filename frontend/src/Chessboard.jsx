@@ -2,8 +2,18 @@ import { useRef } from "react";
 import "./styles.css";
 
 const PIECES = {
-  r: "♜", n: "♞", b: "♝", q: "♛", k: "♚", p: "♟",
-  R: "♖", N: "♘", B: "♗", Q: "♕", K: "♔", P: "♙",
+  r: "♜",
+  n: "♞",
+  b: "♝",
+  q: "♛",
+  k: "♚",
+  p: "♟",
+  R: "♖",
+  N: "♘",
+  B: "♗",
+  Q: "♕",
+  K: "♔",
+  P: "♙",
 };
 
 export default function Chessboard({
@@ -15,7 +25,7 @@ export default function Chessboard({
   capturedWhite = [],
   capturedBlack = [],
   whiteTime,
-  blackTime
+  blackTime,
 }) {
   const dragFrom = useRef(null);
 
@@ -25,7 +35,6 @@ export default function Chessboard({
     row.replace(/[1-8]/g, (n) => ".".repeat(parseInt(n))).split("")
   );
 
-  // Flip board so White is always at the bottom
   const displayBoard = [...board].reverse();
 
   function handleDragStart(e, r, c) {
@@ -41,24 +50,28 @@ export default function Chessboard({
   }
 
   function isLegalTarget(r, c) {
-    return legalMoves.some(m => m.r === r && m.c === c);
+    return legalMoves.some((m) => m.r === r && m.c === c);
   }
 
   function isLastMove(r, c) {
-    return lastMove && (lastMove.from.r === r && lastMove.from.c === c ||
-                        lastMove.to.r === r && lastMove.to.c === c);
+    return (
+      lastMove &&
+      ((lastMove.from.r === r && lastMove.from.c === c) ||
+        (lastMove.to.r === r && lastMove.to.c === c))
+    );
   }
 
   return (
     <div className="chess-container">
-
       {/* Black Clock */}
       <div className="clock black-clock">{formatTime(blackTime)}</div>
 
       {/* Black Captured */}
       <div className="captured black-captured">
         {capturedBlack.map((p, i) => (
-          <span key={i} className="captured-piece">{PIECES[p]}</span>
+          <span key={i} className="captured-piece">
+            {PIECES[p]}
+          </span>
         ))}
       </div>
 
@@ -67,9 +80,11 @@ export default function Chessboard({
         {displayBoard.map((rank, r) =>
           rank.map((sq, c) => {
             const piece = PIECES[sq] || null;
+
             const realR = 7 - r;
             const isLight = (realR + c) % 2 === 0;
-            const isSelected = selected?.r === realR && selected?.c === c;
+            const isSelected =
+              selected?.r === realR && selected?.c === c;
             const legal = isLegalTarget(realR, c);
             const last = isLastMove(realR, c);
 
@@ -89,7 +104,9 @@ export default function Chessboard({
                   <span
                     className="piece"
                     draggable
-                    onDragStart={(e) => handleDragStart(e, realR, c)}
+                    onDragStart={(e) =>
+                      handleDragStart(e, realR, c)
+                    }
                   >
                     {piece}
                   </span>
@@ -103,13 +120,14 @@ export default function Chessboard({
       {/* White Captured */}
       <div className="captured white-captured">
         {capturedWhite.map((p, i) => (
-          <span key={i} className="captured-piece">{PIECES[p]}</span>
+          <span key={i} className="captured-piece">
+            {PIECES[p]}
+          </span>
         ))}
       </div>
 
       {/* White Clock */}
       <div className="clock white-clock">{formatTime(whiteTime)}</div>
-
     </div>
   );
 }
@@ -120,4 +138,3 @@ function formatTime(seconds) {
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
-

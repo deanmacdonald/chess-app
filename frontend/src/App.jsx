@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import Chessboard from "./Chessboard.jsx";
-
-const START_FEN =
-  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+import { fetchState, sendMove, fetchLegalMoves } from "./gameLogic.js";
 
 export default function App() {
-  const [position, setPosition] = useState(START_FEN);
+  const [position, setPosition] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [legalMoves, setLegalMoves] = useState([]); // engine squares: ["e4","e5",...]
 
-  // Captured pieces
   const [capturedWhite, setCapturedWhite] = useState([]);
   const [capturedBlack, setCapturedBlack] = useState([]);
 
-  // Clocks (start with White running)
   const [whiteTime, setWhiteTime] = useState(300);
   const [blackTime, setBlackTime] = useState(300);
 const gameOver = whiteTime === 0 || blackTime === 0;
@@ -20,23 +17,42 @@ const gameOver = whiteTime === 0 || blackTime === 0;
   const [blackRunning, setBlackRunning] = useState(false);
 
 
-  // Timer effect
+  /* -------- INITIAL LOAD FROM API -------- */
+
+  useEffect(() => {
+    fetchState()
+      .then((state) => {
+        setPosition(state.fen);
+        setCapturedWhite(state.captured_white || []);
+        setCapturedBlack(state.captured_black || []);
+        setWhiteTime(state.white_time ?? 300);
+        setBlackTime(state.black_time ?? 300);
+        if (state.turn === "w") {
+          setWhiteRunning(true);
+          setBlackRunning(false);
+        } else {
+          setWhiteRunning(false);
+          setBlackRunning(true);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load state:", err);
+      });
+  }, []);
+
+  /* -------- TIMERS -------- */
+
   useEffect(() => {
     if (gameOver) return;
 
     const interval = setInterval(() => {
-      if (whiteRunning) {
-        setWhiteTime(t => Math.max(t - 1, 0));
-      }
-      if (blackRunning) {
-        setBlackTime(t => Math.max(t - 1, 0));
-      }
+      if (whiteRunning) setWhiteTime((t) => Math.max(t - 1, 0));
+      if (blackRunning) setBlackTime((t) => Math.max(t - 1, 0));
     }, 1000);
 
     return () => clearInterval(interval);
   }, [whiteRunning, blackRunning, gameOver]);
 
-  // Stop game when time hits zero
   useEffect(() => {
     if (whiteTime === 0 || blackTime === 0) {
       setWhiteRunning(false);
@@ -44,93 +60,83 @@ const gameOver = whiteTime === 0 || blackTime === 0;
     }
   }, [whiteTime, blackTime]);
 
-  // Handle board clicks
-  function onSquareClick(r, c) {
-    if (gameOver) return;
+  /* -------- CLICK HANDLER -------- */
 
+  async function onSquareClick(r, c) {
+    if (gameOver || !position) return;
+
+    // First click → select piece + fetch legal moves
     if (!selected) {
-      setSelected({ r, c });
+      const newSelected = { r, c };
+      setSelected(newSelected);
+
+      try {
+        const moves = await fetchLegalMoves(newSelected); // ["e4","e5",...]
+        setLegalMoves(moves);
+      } catch (err) {
+        console.error("Failed to fetch legal moves:", err);
+        setLegalMoves([]);
+      }
+
       return;
     }
 
-    handleMove(selected, { r, c });
+    // Second click → attempt move
+    const from = selected;
+    const to = { r, c };
+
     setSelected(null);
+    setLegalMoves([]);
+
+    await handleMove(from, to);
   }
 
-  // Simple move logic (no legality checks)
-  function handleMove(from, to) {
-    const fenBoard = position.split(" ")[0].split("/");
-    const board = fenBoard.map((row) =>
-      row.replace(/[1-8]/g, (n) => ".".repeat(parseInt(n))).split("")
-    );
+  /* -------- MOVE HANDLER (API) -------- */
 
-    const piece = board[from.r][from.c];
-    const target = board[to.r][to.c];
+  async function handleMove(from, to) {
+    try {
+      const state = await sendMove(from, to);
 
-    if (piece === ".") return;
+      setPosition(state.fen);
+      setCapturedWhite(state.captured_white || []);
+      setCapturedBlack(state.captured_black || []);
 
-    // Capture
-    if (target !== ".") {
-      if (target === target.toUpperCase()) {
-        setCapturedWhite(prev => [...prev, target]);
+      if (state.turn === "w") {
+        setBlackRunning(false);
+        setWhiteRunning(true);
       } else {
-        setCapturedBlack(prev => [...prev, target]);
+        setWhiteRunning(false);
+        setBlackRunning(true);
       }
+
+      if (state.game_over) {
+        setGameOver(true);
+        setWhiteRunning(false);
+        setBlackRunning(false);
+      }
+    } catch (err) {
+      console.error("Move rejected:", err);
     }
-
-    // Move piece
-    board[to.r][to.c] = piece;
-    board[from.r][from.c] = ".";
-
-    // Convert back to FEN (keep side-to-move as-is for now)
-    const newFEN = board
-      .map((row) =>
-        row.join("").replace(/\.{1,8}/g, (m) => m.length.toString())
-      )
-      .join("/");
-
-    setPosition(`${newFEN} w - - 0 1`);
   }
+
+  /* -------- RENDER -------- */
+
+  if (!position) return <h2>Loading game...</h2>;
 
   return (
     <div>
       <h1>Dean’s Chess App</h1>
 
-      {/* Black's clock control: when Black presses, Black stops, White starts */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
-        <button
-          onClick={() => {
-            if (gameOver) return;
-            setBlackRunning(false);
-            setWhiteRunning(true);
-          }}
-        >
-          Black Move (End Turn)
-        </button>
-      </div>
-
       <Chessboard
         position={position}
         selected={selected}
+        legalMoves={legalMoves}
         onSquareClick={onSquareClick}
         capturedWhite={capturedWhite}
         capturedBlack={capturedBlack}
         whiteTime={whiteTime}
         blackTime={blackTime}
       />
-
-      {/* White's clock control: when White presses, White stops, Black starts */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
-        <button
-          onClick={() => {
-            if (gameOver) return;
-            setWhiteRunning(false);
-            setBlackRunning(true);
-          }}
-        >
-          White Move (End Turn)
-        </button>
-      </div>
 
       {gameOver && (
         <h2 style={{ marginTop: "20px" }}>

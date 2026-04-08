@@ -1,29 +1,49 @@
 {
-  "name": "frontend",
+  "name": "chess-frontend",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "cargo run --bin api",
+    "dev:frontend": "vite",
+    "dev:both": "sh ./run-both.sh",
     "build": "vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "format": "prettier --write .",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "chess.js": "^1.4.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.0.0",
+    "howler": "^2.2.4",
+    "nanoid": "^5.0.7",
     "react": "^19.2.4",
-    "react-chessboard": "^5.10.0",
-    "react-dom": "^19.2.4"
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.0.2",
+    "stockfish": "^18.0.5",
+    "vercel": "^50.37.3",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/ui": "^2.1.4",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.4.0",
-    "vite": "^8.0.1"
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2",
+    "vite": "^8.0.1",
+    "vitest": "^2.1.4"
   }
 }

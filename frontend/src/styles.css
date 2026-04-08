@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 /* === Chess Container === */
+=======
+/* ============================
+   CHESS APP — GLOBAL LAYOUT
+   ============================ */
+
+>>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
 .chess-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   width: 100%;
+<<<<<<< HEAD
   padding: 12px 0;
   box-sizing: border-box;
 }
@@ -59,19 +67,117 @@
   border-radius: 4px;
   box-shadow: inset 0 0 0 4px rgba(255, 255, 0, 0.55);
   pointer-events: none;
+=======
+  max-width: 450px;
+  margin: 0 auto;
+>>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
 }
 
-/* === Captured Pieces === */
+/* ============================
+   FORCE ORIENTATION
+   Black (top) → Board → White (bottom)
+   ============================ */
+
+.black-clock,
+.black-captured {
+  order: 1;
+}
+
+.board {
+  order: 2;
+}
+
+.white-captured,
+.white-clock {
+  order: 3;
+}
+
+/* ============================
+   BOARD GRID
+   ============================ */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 4px solid #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================
+   SQUARES
+   ============================ */
+
+.square {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 2.4rem;
+  user-select: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Force chess colors (override dark mode + global theme) */
+.light {
+  background: #f0d9b5 !important;
+}
+
+.dark {
+  background: #b58863 !important;
+}
+
+/* ============================
+   PIECES
+   ============================ */
+
+.piece {
+  z-index: 2;
+  color: #000;
+  font-weight: 500;
+}
+
+/* ============================
+   SELECTED SQUARE HIGHLIGHT
+   ============================ */
+
+.highlight {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 0, 0.35);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ============================
+   CLOCKS
+   ============================ */
+
+.clock {
+  font-size: 1.4rem;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ============================
+   CAPTURED PIECES
+   ============================ */
+
 .captured {
   display: flex;
-  justify-content: center;
   gap: 6px;
-  padding: 4px 0;
-  min-height: 32px;
-  font-size: clamp(20px, 4vw, 32px);
+  font-size: 1.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .captured-piece {
+<<<<<<< HEAD
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
   opacity: 0.9;
 }
@@ -103,3 +209,20 @@ button {
 
 button:hover { opacity: 0.85; }
 
+=======
+  opacity: 0.8;
+}
+
+/* ============================
+   RESPONSIVE TWEAKS
+   ============================ */
+
+@media (max-width: 480px) {
+  .square {
+    font-size: 2rem;
+  }
+  .clock {
+    font-size: 1.2rem;
+  }
+}
+>>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
