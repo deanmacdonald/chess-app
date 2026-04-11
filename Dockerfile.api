@@ -1,0 +1,20 @@
+FROM rustlang/rust:nightly AS builder
+
+WORKDIR /app
+
+# Copy the entire workspace
+COPY . .
+
+# Build only the API crate
+RUN cargo build --release -p api
+
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/target/release/api /usr/local/bin/api
+
+EXPOSE 3001
+
+CMD ["api"]
+

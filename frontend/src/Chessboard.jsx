@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import "./styles.css";
 
 const PIECES = {
@@ -8,12 +9,16 @@ const PIECES = {
 export default function Chessboard({
   position,
   selected,
+  lastMove,
+  legalMoves = [],
   onSquareClick,
   capturedWhite = [],
   capturedBlack = [],
   whiteTime,
   blackTime
 }) {
+  const dragFrom = useRef(null);
+
   // Convert FEN → 2D array
   const rows = position.split(" ")[0].split("/");
   const board = rows.map((row) =>
@@ -22,6 +27,27 @@ export default function Chessboard({
 
   // Flip board so White is always at the bottom
   const displayBoard = [...board].reverse();
+
+  function handleDragStart(e, r, c) {
+    dragFrom.current = { r, c };
+    e.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleDrop(e, r, c) {
+    e.preventDefault();
+    if (!dragFrom.current) return;
+    onSquareClick(r, c, dragFrom.current);
+    dragFrom.current = null;
+  }
+
+  function isLegalTarget(r, c) {
+    return legalMoves.some(m => m.r === r && m.c === c);
+  }
+
+  function isLastMove(r, c) {
+    return lastMove && (lastMove.from.r === r && lastMove.from.c === c ||
+                        lastMove.to.r === r && lastMove.to.c === c);
+  }
 
   return (
     <div className="chess-container">
@@ -41,18 +67,33 @@ export default function Chessboard({
         {displayBoard.map((rank, r) =>
           rank.map((sq, c) => {
             const piece = PIECES[sq] || null;
-            const isLight = ((7 - r) + c) % 2 === 0;
-            const isSelected =
-              selected?.r === 7 - r && selected?.c === c;
+            const realR = 7 - r;
+            const isLight = (realR + c) % 2 === 0;
+            const isSelected = selected?.r === realR && selected?.c === c;
+            const legal = isLegalTarget(realR, c);
+            const last = isLastMove(realR, c);
 
             return (
               <div
                 key={`${r}-${c}`}
                 className={`square ${isLight ? "light" : "dark"}`}
-                onClick={() => onSquareClick(7 - r, c)}
+                onClick={() => onSquareClick(realR, c)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => handleDrop(e, realR, c)}
               >
+                {last && <div className="last-move" />}
                 {isSelected && <div className="highlight" />}
-                {piece && <span className="piece">{piece}</span>}
+                {legal && <div className="legal-dot" />}
+
+                {piece && (
+                  <span
+                    className="piece"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, realR, c)}
+                  >
+                    {piece}
+                  </span>
+                )}
               </div>
             );
           })
@@ -79,3 +120,4 @@ function formatTime(seconds) {
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
+

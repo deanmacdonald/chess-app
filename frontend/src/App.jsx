@@ -15,10 +15,10 @@ export default function App() {
   // Clocks (start with White running)
   const [whiteTime, setWhiteTime] = useState(300);
   const [blackTime, setBlackTime] = useState(300);
+const gameOver = whiteTime === 0 || blackTime === 0;
   const [whiteRunning, setWhiteRunning] = useState(true);
   const [blackRunning, setBlackRunning] = useState(false);
 
-  const [gameOver, setGameOver] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -39,7 +39,6 @@ export default function App() {
   // Stop game when time hits zero
   useEffect(() => {
     if (whiteTime === 0 || blackTime === 0) {
-      setGameOver(true);
       setWhiteRunning(false);
       setBlackRunning(false);
     }
