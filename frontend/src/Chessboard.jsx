@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import "./styles.css";
+import "./index.css"; // IMPORTANT: load the correct stylesheet
 
 const PIECES = {
   r: "♜",
@@ -45,7 +45,10 @@ export default function Chessboard({
   function handleDrop(e, r, c) {
     e.preventDefault();
     if (!dragFrom.current) return;
-    onSquareClick(r, c, dragFrom.current);
+
+    onSquareClick(dragFrom.current.r, dragFrom.current.c);
+    onSquareClick(r, c);
+
     dragFrom.current = null;
   }
 
@@ -57,7 +60,11 @@ export default function Chessboard({
     return (
       lastMove &&
       ((lastMove.from.r === r && lastMove.from.c === c) ||
+<<<<<<< HEAD
         (lastMove.to.r === r && lastMove.to.c === c))
+=======
+       (lastMove.to.r === r && lastMove.to.c === c))
+>>>>>>> 00c7ae2 (Frontend + engine updates, removed old styles.css)
     );
   }
 
