@@ -4,16 +4,9 @@
   --bg-alt: #ffffff;
   --text: #222;
   --text-h: #000;
-<<<<<<< HEAD
-  --border: #d0d0d0;
-  --code-bg: #ececec;
-  --shadow: 0 3px 10px rgba(0,0,0,0.12);
-  --accent: #4a7bd1;
-=======
   --border: #ccc;
   --code-bg: #e8e8e8;
   --shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
->>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,16 +15,9 @@
     --bg-alt: #1e1e1e;
     --text: #e0e0e0;
     --text-h: #fff;
-<<<<<<< HEAD
-    --border: #333;
-    --code-bg: #1f1f1f;
-    --shadow: 0 3px 12px rgba(0,0,0,0.55);
-    --accent: #6fa8ff;
-=======
     --border: #444;
     --code-bg: #2a2a2a;
     --shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
->>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
   }
 }
 
@@ -56,14 +42,9 @@ body {
   padding: 24px;
 }
 
-<<<<<<< HEAD
-/* === Typography === */
-h1, h2, h3 {
-=======
 h1,
 h2,
 h3 {
->>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
   color: var(--text-h);
   margin-bottom: 16px;
   text-align: center;
@@ -183,9 +164,10 @@ button:active {
   letter-spacing: 0.5px;
 }
 
-<<<<<<< HEAD
-=======
 button:hover {
   opacity: 0.85;
 }
->>>>>>> 866e77b (Update frontend scripts, add run-both.sh, fix API URL, unify dev workflow)
+
+button:hover {
+  opacity: 0.85;
+}
