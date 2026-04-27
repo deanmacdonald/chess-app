@@ -1,32 +1,41 @@
 import { useState, useEffect } from "react";
 import Chessboard from "./Chessboard.jsx";
-import { fetchState, sendMove, fetchLegalMoves } from "./gameLogic.js";
+import { fetchBoard, makeMove, resetGame } from "./gameLogic.js";
 
 export default function App() {
+  /* -------- STATE -------- */
+
   const [position, setPosition] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [legalMoves, setLegalMoves] = useState([]); // engine squares: ["e4","e5",...]
+  const [legalMoves, setLegalMoves] = useState([]);
 
   const [capturedWhite, setCapturedWhite] = useState([]);
   const [capturedBlack, setCapturedBlack] = useState([]);
 
   const [whiteTime, setWhiteTime] = useState(300);
   const [blackTime, setBlackTime] = useState(300);
-const gameOver = whiteTime === 0 || blackTime === 0;
+
+  const gameOver = whiteTime === 0 || blackTime === 0;
+
   const [whiteRunning, setWhiteRunning] = useState(true);
   const [blackRunning, setBlackRunning] = useState(false);
-
 
   /* -------- INITIAL LOAD FROM API -------- */
 
   useEffect(() => {
-    fetchState()
+    let mounted = true;
+
+    fetchBoard()
       .then((state) => {
+        if (!mounted) return;
+
         setPosition(state.fen);
         setCapturedWhite(state.captured_white || []);
         setCapturedBlack(state.captured_black || []);
+
         setWhiteTime(state.white_time ?? 300);
         setBlackTime(state.black_time ?? 300);
+
         if (state.turn === "w") {
           setWhiteRunning(true);
           setBlackRunning(false);
@@ -34,54 +43,54 @@ const gameOver = whiteTime === 0 || blackTime === 0;
           setWhiteRunning(false);
           setBlackRunning(true);
         }
+
+        if (state.game_over) {
+          setWhiteRunning(false);
+          setBlackRunning(false);
+        }
       })
-      .catch((err) => {
-        console.error("Failed to load state:", err);
-      });
+      .catch((err) => console.error("Failed to load state:", err));
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  /* -------- TIMERS -------- */
+  /* -------- TIMER EFFECT -------- */
 
   useEffect(() => {
     if (gameOver) return;
 
     const interval = setInterval(() => {
-      if (whiteRunning) setWhiteTime((t) => Math.max(t - 1, 0));
-      if (blackRunning) setBlackTime((t) => Math.max(t - 1, 0));
+      setWhiteTime((t) => (whiteRunning ? Math.max(t - 1, 0) : t));
+      setBlackTime((t) => (blackRunning ? Math.max(t - 1, 0) : t));
     }, 1000);
 
     return () => clearInterval(interval);
   }, [whiteRunning, blackRunning, gameOver]);
 
+  /* -------- GAME OVER CHECK (lint‑safe) -------- */
+
   useEffect(() => {
-    if (whiteTime === 0 || blackTime === 0) {
-      setWhiteRunning(false);
-      setBlackRunning(false);
+    if (!gameOver && (whiteTime === 0 || blackTime === 0)) {
+      Promise.resolve().then(() => {
+        setWhiteRunning(false);
+        setBlackRunning(false);
+      });
     }
-  }, [whiteTime, blackTime]);
+  }, [whiteTime, blackTime, gameOver]);
 
   /* -------- CLICK HANDLER -------- */
 
   async function onSquareClick(r, c) {
     if (gameOver || !position) return;
 
-    // First click → select piece + fetch legal moves
     if (!selected) {
-      const newSelected = { r, c };
-      setSelected(newSelected);
-
-      try {
-        const moves = await fetchLegalMoves(newSelected); // ["e4","e5",...]
-        setLegalMoves(moves);
-      } catch (err) {
-        console.error("Failed to fetch legal moves:", err);
-        setLegalMoves([]);
-      }
-
+      setSelected({ r, c });
+      setLegalMoves([]);
       return;
     }
 
-    // Second click → attempt move
     const from = selected;
     const to = { r, c };
 
@@ -91,26 +100,25 @@ const gameOver = whiteTime === 0 || blackTime === 0;
     await handleMove(from, to);
   }
 
-  /* -------- MOVE HANDLER (API) -------- */
+  /* -------- MOVE HANDLER -------- */
 
   async function handleMove(from, to) {
     try {
-      const state = await sendMove(from, to);
+      const state = await makeMove(from, to);
 
       setPosition(state.fen);
       setCapturedWhite(state.captured_white || []);
       setCapturedBlack(state.captured_black || []);
 
       if (state.turn === "w") {
-        setBlackRunning(false);
         setWhiteRunning(true);
+        setBlackRunning(false);
       } else {
         setWhiteRunning(false);
         setBlackRunning(true);
       }
 
       if (state.game_over) {
-        setGameOver(true);
         setWhiteRunning(false);
         setBlackRunning(false);
       }
