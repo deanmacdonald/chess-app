@@ -5,9 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "cargo run --bin api",
-    "dev:frontend": "vite",
-    "dev:both": "sh ./run-both.sh",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -27,7 +24,6 @@
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.0.2",
     "stockfish": "^18.0.5",
-    "vercel": "^50.37.3",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
@@ -41,9 +37,17 @@
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
     "prettier": "^3.3.3",
     "typescript": "^5.7.2",
+    "vercel": "^52.2.0",
     "vite": "^8.0.1",
     "vitest": "^4.1.5"
+  },
+  "overrides": {
+    "path-to-regexp": "^8.3.0",
+    "undici": "^6.23.1",
+    "tar": "^7.5.1",
+    "smol-toml": "^1.6.1"
   }
 }

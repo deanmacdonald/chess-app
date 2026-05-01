@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import "./index.css"; // IMPORTANT: load the correct stylesheet
+import "./index.css";
 
 const PIECES = {
   r: "♜",
@@ -29,12 +29,13 @@ export default function Chessboard({
 }) {
   const dragFrom = useRef(null);
 
-  // Convert FEN → 2D array
+  // Convert FEN → 2D array (rank 8 → rank 1)
   const rows = position.split(" ")[0].split("/");
   const board = rows.map((row) =>
     row.replace(/[1-8]/g, (n) => ".".repeat(parseInt(n))).split("")
   );
 
+  // Reverse so row 0 = rank 8 (top), row 7 = rank 1 (bottom)
   const displayBoard = [...board].reverse();
 
   function handleDragStart(e, r, c) {
@@ -60,11 +61,7 @@ export default function Chessboard({
     return (
       lastMove &&
       ((lastMove.from.r === r && lastMove.from.c === c) ||
-<<<<<<< HEAD
         (lastMove.to.r === r && lastMove.to.c === c))
-=======
-       (lastMove.to.r === r && lastMove.to.c === c))
->>>>>>> 00c7ae2 (Frontend + engine updates, removed old styles.css)
     );
   }
 
@@ -88,7 +85,9 @@ export default function Chessboard({
           rank.map((sq, c) => {
             const piece = PIECES[sq] || null;
 
-            const realR = 7 - r;
+            // IMPORTANT: r is already correct because displayBoard is reversed
+            const realR = r;
+
             const isLight = (realR + c) % 2 === 0;
             const isSelected =
               selected?.r === realR && selected?.c === c;
@@ -97,7 +96,7 @@ export default function Chessboard({
 
             return (
               <div
-                key={`${r}-${c}`}
+                key={`${realR}-${c}`}
                 className={`square ${isLight ? "light" : "dark"}`}
                 onClick={() => onSquareClick(realR, c)}
                 onDragOver={(e) => e.preventDefault()}
@@ -145,3 +144,4 @@ function formatTime(seconds) {
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
+

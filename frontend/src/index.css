@@ -1,82 +1,40 @@
-/* ============================================================
-   GLOBAL THEME — LIGHT & DARK
-   ============================================================ */
+/* =========================
+   LICHESS-STYLE THEME
+   ========================= */
 :root {
-  /* Base Colors */
-  --bg: #f4f4f4;
-  --bg-alt: #ffffff;
-  --text: #222;
-  --text-h: #000;
-<<<<<<< HEAD
-  --border: #ccc;
-  --code-bg: #e8e8e8;
-  --shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-=======
-  --border: #d0d0d0;
-  --code-bg: #ececec;
+  --bg: #1b1b1b;
+  --bg-alt: #262626;
+  --text: #e0e0e0;
+  --text-h: #ffffff;
+  --border: #3a3a3a;
 
-  /* Accent */
-  --accent: #4a7bd1;
+  --accent: #6fa8ff;
 
-  /* Chessboard Colors */
+  /* Lichess-like board colors */
   --light-square: #f0d9b5;
   --dark-square: #b58863;
-  --highlight-yellow: rgba(255, 255, 0, 0.55);
 
-  /* Radii */
+  --highlight-yellow: rgba(246, 246, 105, 0.7);
+
   --r-xs: 4px;
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 14px;
 
-  /* Spacing */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
   --space-lg: 18px;
   --space-xl: 24px;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 6px rgba(0,0,0,0.15);
-  --shadow-md: 0 3px 10px rgba(0,0,0,0.12);
-  --shadow-lg: 0 4px 18px rgba(0,0,0,0.25);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-md: 0 3px 10px rgba(0,0,0,0.5);
+  --shadow-lg: 0 4px 18px rgba(0,0,0,0.6);
 
-  /* Transitions */
   --t-fast: 0.12s ease;
   --t-med: 0.18s ease;
->>>>>>> 00c7ae2 (Frontend + engine updates, removed old styles.css)
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #121212;
-    --bg-alt: #1e1e1e;
-    --text: #e0e0e0;
-    --text-h: #fff;
-<<<<<<< HEAD
-    --border: #444;
-    --code-bg: #2a2a2a;
-    --shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-=======
-    --border: #333;
-    --code-bg: #1f1f1f;
-
-    --accent: #6fa8ff;
-
-    /* Dark‑mode chessboard */
-    --light-square: #b59a76;
-    --dark-square: #6b4a2f;
-    --highlight-yellow: rgba(255, 255, 120, 0.55);
-
-    --shadow-md: 0 3px 12px rgba(0,0,0,0.55);
-    --shadow-lg: 0 6px 28px rgba(0,0,0,0.35);
->>>>>>> 00c7ae2 (Frontend + engine updates, removed old styles.css)
-  }
-}
-
-/* ============================================================
-   BASE LAYOUT
-   ============================================================ */
 * {
   margin: 0;
   padding: 0;
@@ -85,176 +43,182 @@
 
 html,
 body {
-  background: var(--bg);
+  background: radial-gradient(circle at top, #333 0, #111 55%);
   color: var(--text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.5;
 }
 
 #root {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   padding: var(--space-xl);
 }
 
-<<<<<<< HEAD
-h1,
-h2,
-h3 {
-=======
-/* ============================================================
+/* =========================
    TYPOGRAPHY
-   ============================================================ */
+   ========================= */
 h1, h2, h3 {
->>>>>>> 00c7ae2 (Frontend + engine updates, removed old styles.css)
   color: var(--text-h);
   margin-bottom: var(--space-md);
   text-align: center;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
 }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-button {
+/* =========================
+   CHESS LAYOUT
+   ========================= */
+.chess-container {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  justify-items: center;
+  gap: var(--space-md);
+}
+
+/* =========================
+   BOARD
+   ========================= */
+.board {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  background: #000;
+}
+
+/* =========================
+   SQUARES
+   ========================= */
+.square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(32px, 5vw, 52px);
+  cursor: pointer;
+  transition: filter var(--t-med), transform var(--t-fast);
+}
+
+.light {
+  background: var(--light-square);
+}
+
+.dark {
+  background: var(--dark-square);
+}
+
+.square:hover {
+  filter: brightness(1.08);
+}
+
+/* =========================
+   PIECES
+   ========================= */
+.piece {
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+  transition: transform 120ms ease-out;
+  will-change: transform;
+}
+
+.square:active .piece {
+  transform: scale(0.94);
+}
+
+/* =========================
+   HIGHLIGHT (SELECTED)
+   ========================= */
+.highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xs);
+  background: rgba(246, 246, 105, 0.35);
+  box-shadow: inset 0 0 0 3px var(--highlight-yellow);
+  pointer-events: none;
+}
+
+/* =========================
+   LAST MOVE
+   ========================= */
+.last-move {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xs);
+  background: rgba(246, 246, 105, 0.25);
+  pointer-events: none;
+}
+
+/* =========================
+   LEGAL MOVE DOT
+   ========================= */
+.legal-dot {
+  width: 18px;
+  height: 18px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* =========================
+   CAPTURED PIECES
+   ========================= */
+.captured {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) 0;
+  min-height: 32px;
+  font-size: clamp(20px, 3vw, 30px);
+  color: var(--text-h);
+}
+
+.captured-piece {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+  opacity: 0.9;
+}
+
+/* =========================
+   CLOCKS
+   ========================= */
+.clock {
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: 600;
   padding: var(--space-sm) var(--space-lg);
-  font-size: 16px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   background: var(--bg-alt);
   color: var(--text-h);
-  cursor: pointer;
   box-shadow: var(--shadow-md);
-  transition: background var(--t-med), transform var(--t-fast);
+  border: 1px solid var(--border);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* =========================
+   BUTTONS (OPTIONAL)
+   ========================= */
+button {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 15px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: #333;
+  color: var(--text-h);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--t-med), transform var(--t-fast), box-shadow var(--t-fast);
 }
 
 button:hover {
-  background: var(--code-bg);
+  background: #444;
+  box-shadow: var(--shadow-md);
 }
 
 button:active {
   transform: scale(0.96);
 }
 
-/* ============================================================
-   CHESS CONTAINER
-   ============================================================ */
-.chess-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  width: 100%;
-  padding: var(--space-md) 0;
-}
-
-/* ============================================================
-   CHESSBOARD
-   ============================================================ */
-.board {
-  width: 100%;
-  max-width: 520px;
-  aspect-ratio: 1; /* Ensures perfect square board */
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  border: 3px solid var(--text-h);
-  border-radius: var(--r-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  background: var(--bg-alt);
-}
-
-/* ============================================================
-   SQUARES
-   ============================================================ */
-.square {
-  /* IMPORTANT: no aspect-ratio here — grid handles it */
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(28px, 6vw, 48px);
-  cursor: pointer;
-  transition: background var(--t-med), transform var(--t-fast), filter var(--t-fast);
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
-}
-
-.light { background: var(--light-square); }
-.dark  { background: var(--dark-square); }
-
-.square:hover {
-  filter: brightness(1.08);
-}
-
-/* ============================================================
-   PIECES
-   ============================================================ */
-.piece {
-  pointer-events: none;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35));
-  transition: transform var(--t-fast);
-}
-
-.square:active .piece {
-  transform: scale(0.92);
-}
-
-/* ============================================================
-   HIGHLIGHT (selected square)
-   ============================================================ */
-.highlight {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--r-xs);
-  box-shadow: inset 0 0 0 4px var(--highlight-yellow);
-  pointer-events: none;
-  animation: pulse 0.8s ease-out;
-}
-
-@keyframes pulse {
-  from { box-shadow: inset 0 0 0 6px rgba(255,255,0,0.7); }
-  to   { box-shadow: inset 0 0 0 4px var(--highlight-yellow); }
-}
-
-/* ============================================================
-   CAPTURED PIECES
-   ============================================================ */
-.captured {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-xs) 0;
-  min-height: 32px;
-  font-size: clamp(20px, 4vw, 32px);
-  background: linear-gradient(to bottom, rgba(0,0,0,0.05), transparent);
-}
-
-.captured-piece {
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-  opacity: 0.9;
-}
-
-/* ============================================================
-   CLOCKS
-   ============================================================ */
-.clock {
-  font-size: clamp(22px, 4vw, 34px);
-  font-weight: 700;
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--r-md);
-  background: var(--bg-alt);
-  color: var(--text-h);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border);
-  letter-spacing: 0.5px;
-  text-align: center;
-}
-
-button:hover {
-  opacity: 0.85;
-}
-
-button:hover {
-  opacity: 0.85;
-}
