@@ -5,24 +5,9 @@ use tokio::net::TcpListener;
 use engine::{
     fen::from_fen,
     game::Game,
-    types::{MoveRequest as EngineMoveRequest, Color},
+    pieces::Color,
     search_best_move::search_best_move,
 };
-
-/* ---------------------------------------------------------
-   DATA STRUCTURES
---------------------------------------------------------- */
-
-#[derive(Serialize)]
-struct GameState {
-    fen: String,
-    turn: String,
-    captured_white: Vec<String>,
-    captured_black: Vec<String>,
-    white_time: u32,
-    black_time: u32,
-    game_over: bool,
-}
 
 #[derive(Deserialize)]
 struct BestMoveRequest {
@@ -52,24 +37,17 @@ struct MoveResponse {
     reason: Option<String>,
 }
 
-/* ---------------------------------------------------------
-   ENDPOINTS
---------------------------------------------------------- */
-
 async fn best_move(Json(req): Json<BestMoveRequest>) -> Json<String> {
     let mut board = from_fen(&req.fen).unwrap();
     let result = search_best_move(&mut board, 4);
-
     let mv = match result {
         Some((best_move, _score, _info)) => best_move.to_string(),
         None => "none".to_string(),
     };
-
     Json(mv)
 }
 
 async fn apply_move(Json(req): Json<MoveRequest>) -> Json<MoveResponse> {
-    // Load game from FEN
     let mut game = match Game::from_fen(&req.fen) {
         Ok(g) => g,
         Err(e) => {
@@ -84,46 +62,35 @@ async fn apply_move(Json(req): Json<MoveRequest>) -> Json<MoveResponse> {
         }
     };
 
-    // Convert to engine move request
-    let engine_req = EngineMoveRequest {
-        from_r: req.from.r,
-        from_c: req.from.c,
-        to_r: req.to.r,
-        to_c: req.to.c,
-    };
+    let from = (req.from.r * 8 + req.from.c) as u8;
+    let to   = (req.to.r   * 8 + req.to.c)   as u8;
 
-    // Try the move
-    match game.try_move(engine_req) {
-        Ok(result) => {
-            let new_fen = game.to_fen();
-            let turn = match game.current_turn() {
-                Color::White => "white",
-                Color::Black => "black",
-            };
+    if game.make_move(from, to) {
+        let new_fen = game.to_fen();
+        let turn = match game.current_turn() {
+            Color::White => "white",
+            Color::Black => "black",
+        };
 
-            Json(MoveResponse {
-                legal: true,
-                fen: new_fen,
-                captured: result.captured_piece.map(|p| p.to_string()),
-                turn: turn.into(),
-                game_over: game.is_game_over(),
-                reason: None,
-            })
-        }
-        Err(reason) => Json(MoveResponse {
+        Json(MoveResponse {
+            legal: true,
+            fen: new_fen,
+            captured: None,
+            turn: turn.into(),
+            game_over: game.is_game_over(),
+            reason: None,
+        })
+    } else {
+        Json(MoveResponse {
             legal: false,
             fen: req.fen,
             captured: None,
             turn: "white".into(),
             game_over: false,
-            reason: Some(reason),
-        }),
+            reason: Some("Illegal move".into()),
+        })
     }
 }
-
-/* ---------------------------------------------------------
-   MAIN SERVER
---------------------------------------------------------- */
 
 #[tokio::main]
 async fn main() {
@@ -141,4 +108,3 @@ async fn main() {
         .await
         .expect("Server crashed");
 }
-

@@ -35,3 +35,4 @@ pub mod transposition_table;
 pub mod uci;
 pub mod unmake_move;
 pub mod zobrist;
+pub mod game;   // <-- THIS is the missing line
