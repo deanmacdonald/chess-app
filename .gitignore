@@ -27,3 +27,6 @@ build/
 
 # Vercel
 .vercel/
+frontend/node_modules/
+frontend/dist/
+target/
