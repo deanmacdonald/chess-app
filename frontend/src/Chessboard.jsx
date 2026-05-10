@@ -32,7 +32,7 @@ export default function Chessboard({
   // Convert FEN → 2D array (rank 8 → rank 1)
   const rows = position.split(" ")[0].split("/");
   const board = rows.map((row) =>
-    row.replace(/[1-8]/g, (n) => ".".repeat(parseInt(n))).split("")
+    row.replace(/[1-8]/g, (n) => ".".repeat(parseInt(n))).split(""),
   );
 
   // Reverse so row 0 = rank 8 (top), row 7 = rank 1 (bottom)
@@ -89,8 +89,7 @@ export default function Chessboard({
             const realR = r;
 
             const isLight = (realR + c) % 2 === 0;
-            const isSelected =
-              selected?.r === realR && selected?.c === c;
+            const isSelected = selected?.r === realR && selected?.c === c;
             const legal = isLegalTarget(realR, c);
             const last = isLastMove(realR, c);
 
@@ -110,16 +109,14 @@ export default function Chessboard({
                   <span
                     className="piece"
                     draggable
-                    onDragStart={(e) =>
-                      handleDragStart(e, realR, c)
-                    }
+                    onDragStart={(e) => handleDragStart(e, realR, c)}
                   >
                     {piece}
                   </span>
                 )}
               </div>
             );
-          })
+          }),
         )}
       </div>
 
@@ -144,4 +141,3 @@ function formatTime(seconds) {
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
-

@@ -112,7 +112,6 @@ export default function App() {
       if (result.turn === "white" || result.turn === "black") {
         setCurrentTurn(result.turn);
       }
-
     } catch (err) {
       console.error("Error calling move API:", err);
     }
@@ -127,7 +126,13 @@ export default function App() {
       <h1>Dean’s Chess App</h1>
 
       {/* Black ends turn → White starts */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "10px",
+        }}
+      >
         <button
           onClick={() => {
             if (!gameOver) setCurrentTurn("white");
@@ -149,7 +154,9 @@ export default function App() {
       />
 
       {/* White ends turn → Black starts */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}
+      >
         <button
           onClick={() => {
             if (!gameOver) setCurrentTurn("black");
@@ -167,4 +174,3 @@ export default function App() {
     </div>
   );
 }
-
