@@ -1,0 +1,82 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.engine
+#1 transferring dockerfile: 986B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/rustlang/rust:nightly
+#2 ...
+
+#3 [internal] load metadata for docker.io/library/debian:bookworm-slim
+#3 DONE 0.7s
+
+#2 [internal] load metadata for docker.io/rustlang/rust:nightly
+#2 DONE 0.7s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [runtime 1/5] FROM docker.io/library/debian:bookworm-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d
+#6 resolve docker.io/library/debian:bookworm-slim@sha256:4724b8cc51e33e398f0e2e15e18d5ec2851ff0c2280647e1310bc1642182655d 0.1s done
+#6 DONE 0.1s
+
+#7 [builder 1/9] FROM docker.io/rustlang/rust:nightly@sha256:9b0fc4ea4ab270d6109107788da26ae1997ac562c89468c0403d92b548da825d
+#7 resolve docker.io/rustlang/rust:nightly@sha256:9b0fc4ea4ab270d6109107788da26ae1997ac562c89468c0403d92b548da825d
+#7 resolve docker.io/rustlang/rust:nightly@sha256:9b0fc4ea4ab270d6109107788da26ae1997ac562c89468c0403d92b548da825d 0.1s done
+#7 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 1.80kB 0.0s done
+#5 DONE 0.0s
+
+#8 [builder 5/9] COPY engine/Cargo.toml engine/Cargo.toml
+#8 CACHED
+
+#9 [builder 2/9] RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates  && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [runtime 3/5] WORKDIR /app
+#10 CACHED
+
+#11 [runtime 2/5] RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates  && rm -rf /var/lib/apt/lists/*
+#11 CACHED
+
+#12 [builder 6/9] RUN mkdir -p engine/src && echo "fn main() {}" > engine/src/main.rs
+#12 CACHED
+
+#13 [runtime 4/5] COPY --from=builder /app/target/release/engine /app/engine
+#13 CACHED
+
+#14 [builder 9/9] RUN cargo +nightly build --release -p engine
+#14 CACHED
+
+#15 [builder 7/9] RUN cargo +nightly build --release -p engine || true
+#15 CACHED
+
+#16 [builder 8/9] COPY engine/ engine/
+#16 CACHED
+
+#17 [builder 3/9] WORKDIR /app
+#17 CACHED
+
+#18 [builder 4/9] COPY Cargo.toml .
+#18 CACHED
+
+#19 [runtime 5/5] RUN useradd -m dean
+#19 CACHED
+
+#20 exporting to image
+#20 exporting layers 0.0s done
+#20 exporting manifest sha256:de789e35527e047a2f1d219a75aed95d1613dc880c1b75518edcc12045e620af done
+#20 exporting config sha256:87cd1a36ecb71d07a5753aae888b095d6be2eba494df0e37980f13981c92c66d done
+#20 exporting attestation manifest sha256:47507b67e357bf7c7117bbec25a28348b0aefd6da416789438c941c1cbd8a219
+#20 exporting attestation manifest sha256:47507b67e357bf7c7117bbec25a28348b0aefd6da416789438c941c1cbd8a219 0.1s done
+#20 exporting manifest list sha256:a2fdb73828483997ae6a5811533a7b12a959c3354e05c60fcafc99076feb8c2f 0.0s done
+#20 naming to docker.io/library/chess-engine:latest
+#20 naming to docker.io/library/chess-engine:latest 0.0s done
+#20 unpacking to docker.io/library/chess-engine:latest 0.0s done
+#20 DONE 0.5s
