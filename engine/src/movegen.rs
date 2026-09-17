@@ -58,16 +58,19 @@ fn generate_king_moves(_board: &Board, _color: Color, _list: &mut MoveList) {
 /// ------------------------------
 
 /// Get all pieces of a given type for a color
-fn piece_bb(board: &Board, color: Color, piece: Piece) -> Bitboard {
+#[allow(dead_code)]
+#[allow(dead_code)] fn piece_bb(board: &Board, color: Color, piece: Piece) -> Bitboard {
     board.pieces[piece_index(color, piece)]
 }
 
 /// Get occupancy of enemy pieces
-fn enemy_occupancy(board: &Board, color: Color) -> Bitboard {
+#[allow(dead_code)]
+#[allow(dead_code)] fn enemy_occupancy(board: &Board, color: Color) -> Bitboard {
     board.occupancy_color(color.opposite())
 }
 
 /// Get occupancy of friendly pieces
-fn friendly_occupancy(board: &Board, color: Color) -> Bitboard {
+#[allow(dead_code)]
+#[allow(dead_code)] fn friendly_occupancy(board: &Board, color: Color) -> Bitboard {
     board.occupancy_color(color)
 }

@@ -1,3 +1,5 @@
+use tower_http::cors::{CorsLayer, Any};
+use tower_http::cors::{CorsLayer, Any};
 use std::sync::{Arc, Mutex};
 
 use axum::{
@@ -18,15 +20,17 @@ async fn main() {
     let app_state = Arc::new(Mutex::new(AppState::new()));
 
     let app = Router::new()
+    .route("/status", get(status_handler))
+    .layer(CorsLayer::new().allow_origin(Any))
+    .layer(CorsLayer::new().allow_origin(Any))
         .route("/fen", get(get_fen))
         .route("/reset", post(reset_game))
         .route("/move", post(apply_move))
         .route("/load_fen", post(load_fen))
         .with_state(app_state);
 
-    println!("API running on http://0.0.0.0:8000");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000")
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080")
         .await
         .unwrap();
 
