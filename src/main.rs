@@ -1,5 +1,5 @@
 use tower_http::cors::{CorsLayer, Any};
-use tower_http::cors::{CorsLayer, Any};
+async fn status_handler() -> &'static str { "OK" }
 use std::sync::{Arc, Mutex};
 
 use axum::{

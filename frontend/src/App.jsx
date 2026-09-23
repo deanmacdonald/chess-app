@@ -46,7 +46,7 @@ export default function App() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("http://localhost:8000/board");
+        const res = await fetch("/api/board");
         const data = await res.json();
         setPosition(data.fen);
       } catch (err) {
@@ -74,7 +74,7 @@ export default function App() {
 
   async function handleMove(from, to) {
     try {
-      const res = await fetch("http://localhost:8000/move", {
+      const res = await fetch("/api/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
