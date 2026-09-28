@@ -13,6 +13,7 @@ export const LOCAL_URL = "http://0.0.0.0:8000";
 // - Dev mode → LOCAL backend
 // - Production → Cloudflare tunnel
 export const API_URL = import.meta.env.DEV ? LOCAL_URL : CLOUDFLARE_URL;
+export const API_URL = import.meta.env.VITE_API_URL;
 
 // -------------------------------
 // Fetch the current board state
