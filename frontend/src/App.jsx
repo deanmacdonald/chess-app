@@ -46,7 +46,7 @@ export default function App() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/board");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/board`);
         const data = await res.json();
         setPosition(data.fen);
       } catch (err) {
@@ -74,7 +74,7 @@ export default function App() {
 
   async function handleMove(from, to) {
     try {
-      const res = await fetch("/api/move", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/move`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

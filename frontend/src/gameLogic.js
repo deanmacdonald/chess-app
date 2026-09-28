@@ -1,9 +1,4 @@
-export const CLOUDFLARE_URL =
-  "https://realty-explained-arts-triple.trycloudflare.com";
-
-export const LOCAL_URL = "http://0.0.0.0:8000";
-
-export const API_URL = CLOUDFLARE_URL || LOCAL_URL;
+export const API_URL = import.meta.env.VITE_API_URL;
 
 export async function fetchBoard() {
   const res = await fetch(`${API_URL}/board`);
