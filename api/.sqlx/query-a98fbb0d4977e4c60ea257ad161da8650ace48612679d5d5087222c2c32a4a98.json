@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT fen FROM games WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "fen",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a98fbb0d4977e4c60ea257ad161da8650ace48612679d5d5087222c2c32a4a98"
+}
