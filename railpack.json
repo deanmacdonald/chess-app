@@ -1,0 +1,22 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "nixpacksPlan": {
+      "phases": {
+        "install": {
+          "cmds": [
+            "cargo sqlx prepare -- --bin api"
+          ]
+        },
+        "build": {
+          "cmds": [
+            "cargo build --release"
+          ]
+        }
+      }
+    }
+  },
+  "deploy": {
+    "start": "target/release/api"
+  }
+}
