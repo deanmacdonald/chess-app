@@ -1,0 +1,6 @@
+target/
+.git/
+.gitignore
+*.db
+migrations/
+node_modules/
