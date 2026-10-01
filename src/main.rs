@@ -1,5 +1,4 @@
 use tower_http::cors::{CorsLayer, Any};
-async fn status_handler() -> &'static str { "OK" }
 use std::sync::{Arc, Mutex};
 
 use axum::{
@@ -8,27 +7,33 @@ use axum::{
     Json, Router,
 };
 use serde::Deserialize;
-    use serde_json::json;
+use serde_json::json;
 
 mod state;
-mod engine;   // <-- REQUIRED so Rust sees engine.rs
+mod engine;
+mod routes; // <-- required so Rust sees src/routes/
+use crate::routes::configure::configure_handler; // <-- import your /configure handler
 
 use state::AppState;
+
+// Simple status endpoint
+async fn status_handler() -> &'static str {
+    "OK"
+}
 
 #[tokio::main]
 async fn main() {
     let app_state = Arc::new(Mutex::new(AppState::new()));
 
     let app = Router::new()
-    .route("/status", get(status_handler))
-    .layer(CorsLayer::new().allow_origin(Any))
-    .layer(CorsLayer::new().allow_origin(Any))
+        .route("/status", get(status_handler))
+        .layer(CorsLayer::new().allow_origin(Any))
         .route("/fen", get(get_fen))
         .route("/reset", post(reset_game))
         .route("/move", post(apply_move))
         .route("/load_fen", post(load_fen))
+        .route("/configure", get(configure_handler)) // <-- NEW ROUTE
         .with_state(app_state);
-
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080")
         .await
@@ -56,8 +61,8 @@ async fn reset_game(
 
 #[derive(Deserialize)]
 struct MoveReq {
-    from: String,
-    to: String,
+    from: Option<String>,
+    to: Option<String>,
 }
 
 // POST /move → apply move and return new FEN
@@ -65,8 +70,17 @@ async fn apply_move(
     State(state): State<Arc<Mutex<AppState>>>,
     Json(req): Json<MoveReq>,
 ) -> Json<serde_json::Value> {
-    let new_fen =
-        state.lock().unwrap().apply_move_algebraic(&req.from, &req.to);
+
+    // If missing fields → return current FEN instead of crashing
+    if req.from.is_none() || req.to.is_none() {
+        let fen = state.lock().unwrap().get_fen();
+        return Json(json!({ "fen": fen }));
+    }
+
+    let from = req.from.as_ref().unwrap();
+    let to = req.to.as_ref().unwrap();
+
+    let new_fen = state.lock().unwrap().apply_move_algebraic(from, to);
     Json(json!({ "fen": new_fen }))
 }
 
