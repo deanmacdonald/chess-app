@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import Chessboard from "./Chessboard.jsx";
 
+
+const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 export default function App() {
   /* -------- STATE -------- */
 
-  const [position, setPosition] = useState(null);
+  const [position, setPosition] = useState(START_FEN);
   const [selected, setSelected] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
 
@@ -41,21 +44,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, [whiteRunning, blackRunning, gameOver]);
 
-  /* -------- INITIAL BOARD LOAD -------- */
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/board`);
-        const data = await res.json();
-        setPosition(data.fen);
-      } catch (err) {
-        console.error("Failed to load board:", err);
-      }
-    }
-    load();
-  }, []);
-
   /* -------- HANDLE MOVES -------- */
 
   async function onSquareClick(r, c) {
@@ -74,7 +62,7 @@ export default function App() {
 
   async function handleMove(from, to) {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/move`, {
+      const res = await fetch("/api/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

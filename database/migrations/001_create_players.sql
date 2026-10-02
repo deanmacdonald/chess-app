@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS players (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    rating INTEGER NOT NULL DEFAULT 1200 CHECK (rating >= 0)
+);
+
+INSERT INTO players (name, rating)
+VALUES ('Alex Knight', 1500)
+ON CONFLICT(name) DO NOTHING;
