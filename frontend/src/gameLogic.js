@@ -1,88 +1,119 @@
-// -------------------------------
-// Backend URLs
-// -------------------------------
+// --------------------------------------
+// Backend URL
+//
+// Vercel Production / Preview:
+//   VITE_API_URL=https://black-knight-production.up.railway.app
+//
+// Local Vite development fallback:
+//   http://localhost:3000
+// --------------------------------------
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-// Your NEW Cloudflare Tunnel URL
-export const CLOUDFLARE_URL =
-  "https://eng-swing-heat-cheaper.trycloudflare.com";
+// --------------------------------------
+// Shared API request helper
+// --------------------------------------
+async function request(path, options = {}) {
+  const url = `${API_URL}${path}`;
 
-// Local backend for development
-export const LOCAL_URL = "http://0.0.0.0:8000";
+  let response;
 
-// Auto-switch:
-// - Dev mode → LOCAL backend
-// - Production → Cloudflare tunnel
-export const API_URL = import.meta.env.DEV ? LOCAL_URL : CLOUDFLARE_URL;
-export const API_URL = import.meta.env.VITE_API_URL;
-
-// -------------------------------
-// Fetch the current board state
-// -------------------------------
-export async function fetchBoard() {
   try {
-    const res = await fetch(`${API_URL}/board`);
-    if (!res.ok) throw new Error("Backend returned an error");
-    return await res.json();
-  } catch (err) {
-    console.error("Failed to fetch board:", err);
-    return { error: "Failed to load board" };
+    response = await fetch(url, options);
+  } catch {
+    throw new Error(
+      `Cannot reach the chess API at ${API_URL}. ` +
+        "Check that the Railway service is running and CORS is configured.",
+    );
   }
+
+  const contentType = response.headers.get("content-type") || "";
+
+  let data = null;
+  let text = "";
+
+  if (contentType.includes("application/json")) {
+    data = await response.json();
+  } else {
+    text = await response.text();
+  }
+
+  if (!response.ok) {
+    const message =
+      data?.error ||
+      data?.message ||
+      text ||
+      `${response.status} ${response.statusText}`;
+
+    throw new Error(`API request to ${path} failed: ${message}`);
+  }
+
+  if (!data) {
+    throw new Error(`API request to ${path} did not return JSON.`);
+  }
+
+  return data;
 }
 
-// -------------------------------
-// Make a move + send webhook
-// -------------------------------
+// --------------------------------------
+// Get current chess position as FEN
+// --------------------------------------
+export async function getFEN() {
+  const data = await request("/fen");
+
+  if (typeof data.fen !== "string") {
+    throw new Error(
+      'The "/fen" response did not contain a valid "fen" string.',
+    );
+  }
+
+  return data.fen;
+}
+
+// --------------------------------------
+// Get all legal moves
+//
+// Expected backend response:
+// { "legal_moves": ["e2e4", "e2e3", ...] }
+// --------------------------------------
+export async function getLegalMoves() {
+  const data = await request("/legal_moves");
+
+  if (!Array.isArray(data.legal_moves)) {
+    throw new Error(
+      'The "/legal_moves" response did not contain a "legal_moves" array.',
+    );
+  }
+
+  return data.legal_moves;
+}
+
+// --------------------------------------
+// Make a strict chess move
+//
+// Example:
+// makeMove("e2", "e4")
+// --------------------------------------
 export async function makeMove(from, to) {
-  try {
-    const res = await fetch(`${API_URL}/move`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to }),
-    });
-
-    if (!res.ok) throw new Error("Move request failed");
-
-    const data = await res.json();
-
-    // Fire webhook to Railway backend
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/webhook`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event: "move",
-          data: {
-            from,
-            to,
-            fen: data.fen,
-          },
-        }),
-      });
-    } catch (webhookErr) {
-      console.warn("Webhook failed:", webhookErr);
-    }
-
-    return data;
-  } catch (err) {
-    console.error("Move failed:", err);
-    return { error: "Move failed" };
+  if (!from || !to) {
+    throw new Error(
+      "Both a source square and destination square are required.",
+    );
   }
+
+  return request("/move", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from, to }),
+  });
 }
 
-// -------------------------------
-// Reset the game
-// -------------------------------
+// --------------------------------------
+// Reset the current game
+// --------------------------------------
 export async function resetGame() {
-  try {
-    const res = await fetch(`${API_URL}/reset`, {
-      method: "POST",
-    });
-
-    if (!res.ok) throw new Error("Reset failed");
-
-    return await res.json();
-  } catch (err) {
-    console.error("Reset failed:", err);
-    return { error: "Reset failed" };
-  }
+  return request("/reset", {
+    method: "POST",
+  });
 }
