@@ -1,28 +1,44 @@
-import { describe, it, expect, vi } from "vitest";
-import { resetGame, API_URL } from "../gameLogic";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { API_URL, resetGame } from "../gameLogic";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("resetGame()", () => {
-  it("resets the game and returns JSON", async () => {
+  it("resets the game and returns the backend response", async () => {
     const mockReset = { status: "ok" };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockReset),
-    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(mockReset), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
-    const result = await resetGame();
-    expect(result).toEqual(mockReset);
-    expect(fetch).toHaveBeenCalledWith(`${API_URL}/reset`, {
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(resetGame()).resolves.toEqual(mockReset);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/reset`, {
       method: "POST",
     });
   });
 
-  it("returns error object when reset fails", async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-    });
+  it("throws an error when the backend rejects the reset", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: "Reset failed" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
 
-    const result = await resetGame();
-    expect(result.error).toBe("Reset failed");
+    await expect(resetGame()).rejects.toThrow(
+      "API request to /reset failed: Reset failed",
+    );
   });
 });

@@ -1,27 +1,42 @@
-import { describe, it, expect, vi } from "vitest";
-import { fetchBoard, API_URL } from "../gameLogic";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { API_URL, getFEN } from "../gameLogic";
 
-describe("fetchBoard()", () => {
-  it("returns board JSON when backend responds", async () => {
-    const mockBoard = { board: ["r", "n", "b"] };
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
-    // Mock fetch
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockBoard),
-    });
+describe("getFEN()", () => {
+  it("returns the FEN string when the backend responds", async () => {
+    const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    const result = await fetchBoard();
-    expect(result).toEqual(mockBoard);
-    expect(fetch).toHaveBeenCalledWith(`${API_URL}/board`);
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ fen }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getFEN()).resolves.toBe(fen);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/fen`, {});
   });
 
-  it("returns error object when backend fails", async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-    });
+  it("throws an error when the backend rejects the request", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: "Failed to load position" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
 
-    const result = await fetchBoard();
-    expect(result.error).toBe("Failed to load board");
+    await expect(getFEN()).rejects.toThrow(
+      "API request to /fen failed: Failed to load position",
+    );
   });
 });

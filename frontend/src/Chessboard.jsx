@@ -169,7 +169,24 @@ export default function Chessboard() {
                 aria-label={`${square}${piece ? ` ${piece}` : ""}`}
               >
                 {piece && (
-                  <span className="piece" aria-hidden="true">{({K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"})[piece]}</span>
+                  <span className="piece" aria-hidden="true">
+                    {
+                      {
+                        K: "♔",
+                        Q: "♕",
+                        R: "♖",
+                        B: "♗",
+                        N: "♘",
+                        P: "♙",
+                        k: "♚",
+                        q: "♛",
+                        r: "♜",
+                        b: "♝",
+                        n: "♞",
+                        p: "♟",
+                      }[piece]
+                    }
+                  </span>
                 )}
 
                 {isLegal && <span className="highlight" />}
