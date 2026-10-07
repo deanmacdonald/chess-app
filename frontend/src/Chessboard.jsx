@@ -10,7 +10,7 @@ function fenToBoard(fen) {
     throw new Error("Expected a FEN string.");
   }
 
-  const rows = fen.trim().split(/s+/)[0].split("/");
+  const rows = fen.trim().split(" ")[0].split("/");
 
   if (rows.length !== 8) {
     throw new Error(`Invalid FEN: expected 8 rows, received ${rows.length}.`);
@@ -111,8 +111,8 @@ export default function Chessboard() {
           : "Unable to contact the chess backend.",
       );
     } finally {
-      setSelected(null);
-      setLegalSquares([]);
+      if (selected) setSelected(null);
+      if (selected) setLegalSquares([]);
     }
   }
 
@@ -169,12 +169,7 @@ export default function Chessboard() {
                 aria-label={`${square}${piece ? ` ${piece}` : ""}`}
               >
                 {piece && (
-                  <img
-                    src={`/pieces/${piece}.png`}
-                    alt=""
-                    className="piece"
-                    draggable="false"
-                  />
+                  <span className="piece" aria-hidden="true">{({K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"})[piece]}</span>
                 )}
 
                 {isLegal && <span className="highlight" />}
