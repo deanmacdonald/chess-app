@@ -37,3 +37,4 @@ frontend/.cache/
 target/
 .vercel
 .env*
+/target/
