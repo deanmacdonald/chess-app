@@ -38,3 +38,15 @@ target/
 .vercel
 .env*
 /target/
+
+# Local runtime/state
+chess.db
+chess.db-*
+*.db-journal
+game.pgn
+.railway/
+
+# Local helper data/scripts
+insert_all_pgns.py
+insert_pgn.py
+migrate_games_compatible.sql
