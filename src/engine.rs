@@ -101,9 +101,29 @@ impl ChessEngine {
 
 // Save FEN and return row ID
 fn save_fen_to_db(fen: &str) -> i64 {
-    let conn = Connection::open("chess.db").unwrap();
-    conn.execute("INSERT INTO games (fen) VALUES (?1)", params![fen])
-        .unwrap();
+    match try_save_fen_to_db(fen) {
+        Ok(id) => id,
+        Err(error) => {
+            eprintln!("Failed to save chess position to SQLite: {error}");
+            -1
+        }
+    }
+}
 
-    conn.last_insert_rowid()
+fn try_save_fen_to_db(fen: &str) -> rusqlite::Result<i64> {
+    let conn = Connection::open("chess.db")?;
+
+    conn.busy_timeout(std::time::Duration::from_secs(2))?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS games (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fen TEXT NOT NULL
+        )",
+        [],
+    )?;
+
+    conn.execute("INSERT INTO games (fen) VALUES (?1)", params![fen])?;
+
+    Ok(conn.last_insert_rowid())
 }
