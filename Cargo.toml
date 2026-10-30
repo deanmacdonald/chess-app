@@ -2,13 +2,12 @@
 members = ["engine", "cli"]
 resolver = "2"
 
-[package]
-name = "chess-api"
-license = "MIT"
+[workspace.package]
 version = "0.1.1"
 edition = "2021"
+license = "MIT"
 
-[dependencies]
+[workspace.dependencies]
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -18,20 +17,46 @@ axum = "0.8"
 tower = "0.5"
 tower-http = { version = "0.7", features = ["cors"] }
 
-# Chess engine crate
+# Chess engine
 chess = "3.2.0"
+
+# Database and security
 rusqlite = { version = "0.41.1", features = ["bundled"] }
 hmac = "0.13.0"
 sha2 = "0.11.1"
 chrono = "0.4.45"
 
 # Android-safe replacements
-[target.'cfg(target_os = "android")'.dependencies]
 libc = "0.2"
 nix = { version = "0.31", features = ["term"] }
+termios = "0.3"
+
+[package]
+name = "chess-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+chess-api-engine = { path = "engine" }
+chess.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+rusqlite.workspace = true
+hmac.workspace = true
+sha2.workspace = true
+chrono.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+libc.workspace = true
+nix.workspace = true
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-termios = "0.3"
+termios.workspace = true
 
 [profile.release]
 opt-level = 3
