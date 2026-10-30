@@ -4,7 +4,8 @@ resolver = "2"
 
 [package]
 name = "chess-api"
-version = "0.1.0"
+license = "MIT"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
@@ -19,9 +20,9 @@ tower-http = { version = "0.7", features = ["cors"] }
 
 # Chess engine crate
 chess = "3.2.0"
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+rusqlite = { version = "0.41.1", features = ["bundled"] }
 hmac = "0.13.0"
-sha2 = "0.11.0"
+sha2 = "0.11.1"
 chrono = "0.4.45"
 
 # Android-safe replacements

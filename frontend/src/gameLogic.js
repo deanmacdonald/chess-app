@@ -1,40 +1,52 @@
-// --------------------------------------
-// Backend URL
-//
-// Vercel Production / Preview:
-//   VITE_API_URL=https://black-knight-production.up.railway.app
-//
-// Local Vite development fallback:
-//   http://localhost:3000
-// --------------------------------------
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 
-// --------------------------------------
-// Shared API request helper
-// --------------------------------------
+// Production uses the same-origin Vercel proxy.
+// Local development can use VITE_API_URL or localhost:3000.
+export const API_URL = import.meta.env.PROD
+  ? "/api"
+  : configuredApiUrl || "http://localhost:3000";
+
+function apiUrl(path) {
+  const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${baseUrl}${normalizedPath}`;
+}
+
 async function request(path, options = {}) {
-  const url = `${API_URL}${path}`;
-
+  const url = apiUrl(path);
   let response;
 
   try {
-    response = await fetch(url, options);
-  } catch {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...options.headers,
+      },
+    });
+  } catch (error) {
     throw new Error(
-      `Cannot reach the chess API at ${API_URL}. ` +
-        "Check that the Railway service is running and CORS is configured.",
+      `Cannot reach the chess API at ${url}. ` +
+        (error instanceof Error ? error.message : "Network request failed."),
     );
   }
 
   const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
 
   let data = null;
   let text = "";
 
-  if (contentType.includes("application/json")) {
-    data = await response.json();
-  } else {
-    text = await response.text();
+  try {
+    if (isJson) {
+      data = await response.json();
+    } else {
+      text = await response.text();
+    }
+  } catch {
+    throw new Error(`API request to ${url} returned unreadable data.`);
   }
 
   if (!response.ok) {
@@ -42,21 +54,21 @@ async function request(path, options = {}) {
       data?.error ||
       data?.message ||
       text ||
-      `${response.status} ${response.statusText}`;
+      response.statusText ||
+      "Request failed";
 
-    throw new Error(`API request to ${path} failed: ${message}`);
+    throw new Error(
+      `API request to ${url} failed (${response.status}): ${message}`,
+    );
   }
 
-  if (!data) {
-    throw new Error(`API request to ${path} did not return JSON.`);
+  if (!data || typeof data !== "object") {
+    throw new Error(`API request to ${url} did not return JSON.`);
   }
 
   return data;
 }
 
-// --------------------------------------
-// Get current chess position as FEN
-// --------------------------------------
 export async function getFEN() {
   const data = await request("/fen");
 
@@ -69,12 +81,6 @@ export async function getFEN() {
   return data.fen;
 }
 
-// --------------------------------------
-// Get all legal moves
-//
-// Expected backend response:
-// { "legal_moves": ["e2e4", "e2e3", ...] }
-// --------------------------------------
 export async function getLegalMoves() {
   const data = await request("/legal_moves");
 
@@ -87,12 +93,6 @@ export async function getLegalMoves() {
   return data.legal_moves;
 }
 
-// --------------------------------------
-// Make a strict chess move
-//
-// Example:
-// makeMove("e2", "e4")
-// --------------------------------------
 export async function makeMove(from, to) {
   if (!from || !to) {
     throw new Error(
@@ -109,9 +109,6 @@ export async function makeMove(from, to) {
   });
 }
 
-// --------------------------------------
-// Reset the current game
-// --------------------------------------
 export async function resetGame() {
   return request("/reset", {
     method: "POST",

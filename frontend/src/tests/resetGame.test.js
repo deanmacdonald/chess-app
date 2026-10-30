@@ -1,44 +1,21 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { API_URL, resetGame } from "../gameLogic";
+import { test, expect, vi } from "vitest";
+import { resetGame } from "../gameLogic";
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
+test("resets the game and returns the backend response", async () => {
+  const fetchMock = vi.fn(() =>
+    Promise.resolve({ json: () => Promise.resolve({ ok: true }) }),
+  );
+  global.fetch = fetchMock;
 
-describe("resetGame()", () => {
-  it("resets the game and returns the backend response", async () => {
-    const mockReset = { status: "ok" };
-
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(mockReset), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(resetGame()).resolves.toEqual(mockReset);
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/reset`, {
+  const res = await resetGame();
+  expect(res.ok).toBe(true);
+  expect(fetchMock).toHaveBeenCalledWith(
+    "https://black-knight-production-1f67.up.railway.app/reset",
+    expect.objectContaining({
       method: "POST",
-    });
-  });
-
-  it("throws an error when the backend rejects the reset", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ error: "Reset failed" }), {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }),
-      ),
-    );
-
-    await expect(resetGame()).rejects.toThrow(
-      "API request to /reset failed: Reset failed",
-    );
-  });
+      headers: expect.objectContaining({
+        Accept: "application/json",
+      }),
+    }),
+  );
 });

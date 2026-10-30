@@ -1,0 +1,241 @@
+:root {
+  color: #f5f5f5;
+  background: #111;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: radial-gradient(
+    circle at top,
+    #333 0%,
+    #171717 46%,
+    #090909 100%
+  );
+}
+
+button {
+  font: inherit;
+}
+
+.chess-container {
+  width: min(100%, 620px);
+  margin: 0 auto;
+  padding: 22px 14px 28px;
+  text-align: center;
+}
+
+.game-header h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 6vw, 2.5rem);
+}
+
+.turn-label,
+.status-label {
+  margin: 10px 0 0;
+  font-size: 1.05rem;
+}
+
+.status-label {
+  color: #e6e6e6;
+}
+
+.game-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 18px 0 10px;
+}
+
+.game-controls button {
+  min-height: 42px;
+  border: 1px solid #666;
+  border-radius: 8px;
+  padding: 9px 14px;
+  color: #fff;
+  background: #3c3c3c;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.game-controls button:hover:not(:disabled) {
+  background: #505050;
+}
+
+.game-controls button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.game-help {
+  margin: 10px auto 12px;
+  max-width: 460px;
+  color: #ddd;
+  font-size: 0.92rem;
+}
+
+.game-message {
+  min-height: 1.4em;
+  margin: 10px auto 15px;
+  max-width: 540px;
+  color: #ffd37c;
+  line-height: 1.45;
+}
+
+.board-shell {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: stretch;
+  width: min(100%, 560px);
+  margin: 0 auto;
+}
+
+.rank-labels {
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  align-items: center;
+  color: #cfcfcf;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 4px solid #563b2d;
+  border-radius: 5px;
+  box-shadow: 0 8px 26px rgb(0 0 0 / 50%);
+}
+
+.square {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.square:disabled {
+  cursor: wait;
+}
+
+.square.light {
+  background: #f0d9b5;
+}
+
+.square.dark {
+  background: #b58863;
+}
+
+.square.selected {
+  outline: 4px solid #ffd54f;
+  outline-offset: -4px;
+  z-index: 1;
+}
+
+.square.legal::before {
+  position: absolute;
+  z-index: 1;
+  width: 26%;
+  height: 26%;
+  border-radius: 999px;
+  content: "";
+  background: rgb(25 85 35 / 72%);
+  pointer-events: none;
+}
+
+.square.legal:has(.piece)::before {
+  width: 84%;
+  height: 84%;
+  border: 4px solid rgb(185 50 50 / 80%);
+  background: transparent;
+}
+
+.piece {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-family: "Arial Unicode MS", "Noto Sans Symbols 2", sans-serif;
+  font-size: clamp(1.8rem, 9vw, 4.25rem);
+  line-height: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.white-piece {
+  color: #fffaf0;
+  text-shadow:
+    0 1px 0 #111,
+    1px 0 0 #111,
+    -1px 0 0 #111,
+    0 -1px 0 #111,
+    0 2px 3px rgb(0 0 0 / 55%);
+}
+
+.black-piece {
+  color: #141414;
+  text-shadow: 0 1px 1px rgb(255 255 255 / 28%);
+}
+
+.highlight {
+  display: none;
+}
+
+.file-labels {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  width: calc(min(100%, 560px) - 22px);
+  margin: 4px 0 0 auto;
+  padding-left: 4px;
+  color: #cfcfcf;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+@media (max-width: 390px) {
+  .chess-container {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .game-controls {
+    gap: 7px;
+  }
+
+  .game-controls button {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .board-shell {
+    grid-template-columns: 17px minmax(0, 1fr);
+  }
+
+  .file-labels {
+    width: calc(min(100%, 560px) - 17px);
+  }
+}

@@ -1,0 +1,38 @@
+[licenses]
+allow = [
+version = 2
+ignore = [
+version = 2
+"RUSTSEC-2026-0097",
+"RUSTSEC-2019-0036",
+"RUSTSEC-2020-0036",
+]
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+]
+
+
+[bans]
+
+[advisories]
+unmaintained = "all"
+unsound = "all"
+
+# Yanked uses allow/warn/deny in v0.19.x
+yanked = "warn"
+
+# v0.19.x expects this key
+
+# v0.19.x expects this key
+ignore = []
+version = 2
+ignore = [
+version = 2
+"RUSTSEC-2026-0097",
+"RUSTSEC-2019-0036",
+"RUSTSEC-2020-0036",
+]

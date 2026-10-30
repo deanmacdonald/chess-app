@@ -31,6 +31,7 @@ pub fn build_routes(state: SharedState) -> Router {
         .allow_headers([CONTENT_TYPE]);
 
     Router::new()
+.route("/health", get(|| async { "OK" }))
         .route("/status", get(server_status))
         .route("/fen", get(get_fen))
         .route("/move", post(apply_move_strict))

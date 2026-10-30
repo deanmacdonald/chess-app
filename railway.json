@@ -1,0 +1,10 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK",
+    "buildCommand": "cargo clean && cargo build --release --package chess-api --bin chess-api && install -D -m 755 target/release/chess-api bin/chess-api"
+  },
+  "deploy": {
+    "startCommand": "./bin/chess-api"
+  }
+}

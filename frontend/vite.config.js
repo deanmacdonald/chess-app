@@ -4,8 +4,11 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
 
-  // Local development only — Vercel ignores this in production
   server: {
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: false,
+
     proxy: {
       "/api": {
         target: "http://localhost:8000",
@@ -15,10 +18,7 @@ export default defineConfig({
     },
   },
 
-  // Production build upgrades for Vercel
   build: {
-    sourcemap: false, // smaller build, faster deploy
-    minify: "esbuild", // fastest minifier
-    chunkSizeWarningLimit: 800, // prevents warnings for chess assets
+    sourcemap: false,
   },
 });

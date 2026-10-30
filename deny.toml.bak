@@ -1,0 +1,35 @@
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+]
+
+deny = [
+    "GPL-3.0",
+    "AGPL-3.0",
+]
+
+[bans]
+deny = [
+    { crate = "failure", reason = "deprecated and unmaintained" },
+    { crate = "failure_derive", reason = "deprecated and unmaintained" },
+]
+
+[advisories]
+vulnerability = "all"
+unmaintained = "all"
+unsound = "all"
+notice = "warn"
+
+# Yanked uses allow/warn/deny in v0.19.x
+yanked = "warn"
+
+# v0.19.x expects this key
+severity-threshold = "low"
+
+# v0.19.x expects this key
+ignore = []

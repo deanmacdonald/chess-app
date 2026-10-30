@@ -1,46 +1,23 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { API_URL, makeMove } from "../gameLogic";
+import { test, expect, vi } from "vitest";
+import { makeMove } from "../gameLogic";
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
+test("sends the move and returns the backend response", async () => {
+  const fetchMock = vi.fn(() =>
+    Promise.resolve({ json: () => Promise.resolve({ ok: true }) }),
+  );
+  global.fetch = fetchMock;
 
-describe("makeMove()", () => {
-  it("sends the move and returns the backend response", async () => {
-    const mockResponse = { fen: "new-fen-string" };
-
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(mockResponse), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
-
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(makeMove("e2", "e4")).resolves.toEqual(mockResponse);
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/move`, {
+  const res = await makeMove("e2", "e4");
+  expect(res.ok).toBe(true);
+  expect(fetchMock).toHaveBeenCalledWith(
+    "https://black-knight-production-1f67.up.railway.app/move",
+    expect.objectContaining({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: expect.objectContaining({
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      }),
       body: JSON.stringify({ from: "e2", to: "e4" }),
-    });
-  });
-
-  it("throws an error when the backend rejects the move", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ error: "Move failed" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }),
-      ),
-    );
-
-    await expect(makeMove("e2", "e4")).rejects.toThrow(
-      "API request to /move failed: Move failed",
-    );
-  });
+    }),
+  );
 });

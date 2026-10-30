@@ -4,6 +4,7 @@ pub struct AppState {
     pub engine: ChessEngine,
 }
 
+#[allow(dead_code)]
 impl AppState {
     pub fn new() -> Self {
         Self {

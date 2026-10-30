@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n BACKEND,FRONTEND \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd .. && cargo watch -q -c -w api/src -w engine/src -x \"run --bin chess-api\"",
+    "dev:backend": "cd .. && cargo watch -q -c -w src -w engine/src -x \"run --bin chess-api\"",
     "dev:frontend": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -22,6 +22,7 @@
     "howler": "^2.2.4",
     "nanoid": "^5.0.7",
     "react": "^19.2.4",
+    "react-chessboard": "^5.12.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.2.4",

@@ -1,0 +1,113 @@
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+
+export const API_URL =
+  configuredApiUrl || (import.meta.env.DEV ? "http://localhost:3000" : "");
+
+function apiUrl(path) {
+  if (!API_URL) {
+    throw new Error(
+      "Chess API URL is missing. Configure VITE_API_URL in Vercel and redeploy.",
+    );
+  }
+
+  const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+
+  return `${baseUrl}${path}`;
+}
+
+async function request(path, options = {}) {
+  let response;
+
+  try {
+    response = await fetch(apiUrl(path), {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new Error(
+      `Cannot reach the chess API at ${API_URL || "(not configured)"}. ` +
+        "Check the Railway deployment, API URL, and backend CORS settings.",
+    );
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
+  let data = null;
+  let text = "";
+
+  try {
+    if (isJson) {
+      data = await response.json();
+    } else {
+      text = await response.text();
+    }
+  } catch {
+    throw new Error(`API request to ${path} returned unreadable data.`);
+  }
+
+  if (!response.ok) {
+    const message =
+      data?.error ||
+      data?.message ||
+      text ||
+      `${response.status} ${response.statusText}`;
+
+    throw new Error(`API request to ${path} failed: ${message}`);
+  }
+
+  if (!data || typeof data !== "object") {
+    throw new Error(`API request to ${path} did not return JSON.`);
+  }
+
+  return data;
+}
+
+export async function getFEN() {
+  const data = await request("/fen");
+
+  if (typeof data.fen !== "string") {
+    throw new Error(
+      'The "/fen" response did not contain a valid "fen" string.',
+    );
+  }
+
+  return data.fen;
+}
+
+export async function getLegalMoves() {
+  const data = await request("/legal_moves");
+
+  if (!Array.isArray(data.legal_moves)) {
+    throw new Error(
+      'The "/legal_moves" response did not contain a "legal_moves" array.',
+    );
+  }
+
+  return data.legal_moves;
+}
+
+export async function makeMove(from, to) {
+  if (!from || !to) {
+    throw new Error(
+      "Both a source square and destination square are required.",
+    );
+  }
+
+  return request("/move", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from, to }),
+  });
+}
+
+export async function resetGame() {
+  return request("/reset", {
+    method: "POST",
+  });
+}

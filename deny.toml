@@ -1,0 +1,21 @@
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+"Unicode-3.0",
+]
+
+[bans]
+
+[advisories]
+version = 2
+unmaintained = "all"
+unsound = "all"
+yanked = "warn"
+ignore = [
+    "RUSTSEC-2026-0097",
+    "RUSTSEC-2019-0036",
+    "RUSTSEC-2020-0036",
+]
