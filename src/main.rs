@@ -3,6 +3,7 @@ use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 
 mod engine;
+mod engine_ai;
 mod routes;
 mod state;
 mod webhook;

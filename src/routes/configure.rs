@@ -26,14 +26,16 @@ pub fn build_routes(state: SharedState) -> Router {
         .allow_origin([
             HeaderValue::from_static("http://127.0.0.1:5173"),
             HeaderValue::from_static("http://localhost:5173"),
+            HeaderValue::from_static("https://chess-app-psi-cyan.vercel.app"),
         ])
         .allow_methods([Method::GET, Method::POST])
         .allow_headers([CONTENT_TYPE]);
 
     Router::new()
-.route("/health", get(|| async { "OK" }))
+        .route("/health", get(|| async { "OK" }))
         .route("/status", get(server_status))
         .route("/fen", get(get_fen))
+        .route("/best_move", post(crate::engine_ai::best_move))
         .route("/move", post(apply_move_strict))
         .route("/reset", post(reset_game))
         .route("/legal_moves", get(get_legal_moves))
