@@ -76,16 +76,18 @@ function turnFromFEN(fen) {
 
   return activeColor === "b" ? "Black" : "White";
 }
+
 export default function Chessboard() {
   const [board, setBoard] = useState(() => fenToBoard(STARTING_FEN));
   const [selected, setSelected] = useState(null);
   const [legalSquares, setLegalSquares] = useState([]);
   const [turn, setTurn] = useState("White");
-  const [status, setStatus] = useState("Ongoing");
+  const [status, setStatus] = useState("Not started");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
 
   const displayRows = useMemo(() => {
     const rows = [];
@@ -151,7 +153,38 @@ export default function Chessboard() {
     queueMicrotask(loadGame);
   }, []);
 
+  async function handleStartGame() {
+    if (busy || loading) {
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+    clearSelection();
+
+    try {
+      const result = await resetGame();
+      applyGameResult(result);
+      setGameStarted(true);
+      setMessage("Game started. White moves first.");
+    } catch (error) {
+      console.error("Could not start game:", error);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not start the game. Please try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function selectPiece(square, piece) {
+    if (!gameStarted) {
+      setMessage("Press Start Game to begin.");
+      return;
+    }
+
     if (!piece) {
       return;
     }
@@ -195,7 +228,7 @@ export default function Chessboard() {
   }
 
   async function submitMove(from, to) {
-    if (!from || !to || from === to || busy) {
+    if (!gameStarted || !from || !to || from === to || busy) {
       return;
     }
 
@@ -224,7 +257,11 @@ export default function Chessboard() {
   }
 
   async function handleSquareClick(square, piece) {
-    if (loading || busy) {
+    if (loading || busy || !gameStarted) {
+      if (!gameStarted) {
+        setMessage("Press Start Game to begin.");
+      }
+
       return;
     }
 
@@ -255,7 +292,7 @@ export default function Chessboard() {
   }
 
   function handleDragStart(event, square, piece) {
-    if (loading || busy || sideForPiece(piece) !== turn) {
+    if (loading || busy || !gameStarted || sideForPiece(piece) !== turn) {
       event.preventDefault();
       return;
     }
@@ -268,7 +305,7 @@ export default function Chessboard() {
   async function handleDrop(event, destination) {
     event.preventDefault();
 
-    if (loading || busy) {
+    if (loading || busy || !gameStarted) {
       return;
     }
 
@@ -293,6 +330,7 @@ export default function Chessboard() {
     try {
       const result = await resetGame();
       applyGameResult(result);
+      setGameStarted(true);
     } catch (error) {
       console.error("Reset failed:", error);
       setMessage(
@@ -314,100 +352,121 @@ export default function Chessboard() {
     ? ["1", "2", "3", "4", "5", "6", "7", "8"]
     : ["8", "7", "6", "5", "4", "3", "2", "1"];
 
+  const boardDisabled = loading || busy || !gameStarted;
+
   return (
     <main className="chess-container">
-      <header className="game-header">
-        <h1>Dean&apos;s Chess Game</h1>
-        <p className="turn-label">
-          Turn: <strong>{turn}</strong>
+      <aside className="controls-panel">
+        <header className="game-header">
+          <h1>Dean&apos;s Chess Game</h1>
+          <p className="turn-label">
+            Turn: <strong>{turn}</strong>
+          </p>
+          <p className="status-label">Status: {status}</p>
+        </header>
+
+        <div className="game-controls">
+          <button
+            type="button"
+            className="start-button"
+            onClick={handleStartGame}
+            disabled={loading || busy || gameStarted}
+          >
+            {loading
+              ? "Loading…"
+              : busy
+                ? "Starting…"
+                : gameStarted
+                  ? "Game In Progress"
+                  : "Start Game"}
+          </button>
+
+          <button type="button" onClick={handleReset} disabled={busy}>
+            {busy ? "Working…" : "Reset Game"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFlipped((current) => !current)}
+            disabled={busy}
+          >
+            Flip Board
+          </button>
+
+          <button type="button" onClick={loadGame} disabled={loading || busy}>
+            {loading ? "Loading…" : "Reload Game"}
+          </button>
+        </div>
+
+        {message ? (
+          <p className="game-message" role="alert">
+            {message}
+          </p>
+        ) : null}
+
+        <p className="game-help">
+          Tap a piece, then tap a highlighted destination. Drag-and-drop is also
+          enabled on browsers that support it.
         </p>
-        <p className="status-label">Status: {status}</p>
-      </header>
+      </aside>
 
-      <div className="game-controls">
-        <button type="button" onClick={handleReset} disabled={busy}>
-          {busy ? "Working…" : "Reset Game"}
-        </button>
+      <section className="board-column">
+        <div className="board-shell">
+          <div className="rank-labels" aria-hidden="true">
+            {visibleRanks.map((rank) => (
+              <span key={rank}>{rank}</span>
+            ))}
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setFlipped((current) => !current)}
-          disabled={busy}
-        >
-          Flip Board
-        </button>
+          <div className="board" aria-label="Chessboard">
+            {displayRows.map(({ piece, square, row, col }) => {
+              const isLegal = legalSquares.includes(square);
+              const isSelected = selected === square;
+              const squareColor = (row + col) % 2 === 0 ? "light" : "dark";
 
-        <button type="button" onClick={loadGame} disabled={loading || busy}>
-          {loading ? "Loading…" : "Reload Game"}
-        </button>
-      </div>
+              return (
+                <button
+                  type="button"
+                  key={square}
+                  className={`square ${squareColor} ${
+                    isSelected ? "selected" : ""
+                  } ${isLegal ? "legal" : ""}`}
+                  onClick={() => handleSquareClick(square, piece)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => handleDrop(event, square)}
+                  disabled={boardDisabled}
+                  aria-label={`${square}${piece ? ` ${piece}` : " empty"}`}
+                >
+                  {piece ? (
+                    <span
+                      className={`piece ${
+                        isWhitePiece(piece) ? "white-piece" : "black-piece"
+                      }`}
+                      draggable={!boardDisabled && sideForPiece(piece) === turn}
+                      onDragStart={(event) =>
+                        handleDragStart(event, square, piece)
+                      }
+                      aria-hidden="true"
+                    >
+                      {PIECES[piece]}
+                    </span>
+                  ) : null}
 
-      <p className="game-help">
-        Tap a piece, then tap a highlighted destination. Drag-and-drop is also
-        enabled on browsers that support it.
-      </p>
+                  {isLegal ? (
+                    <span className="highlight" aria-hidden="true" />
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      {message && (
-        <p className="game-message" role="alert">
-          {message}
-        </p>
-      )}
-
-      <div className="board-shell">
-        <div className="rank-labels" aria-hidden="true">
-          {visibleRanks.map((rank) => (
-            <span key={rank}>{rank}</span>
+        <div className="file-labels" aria-hidden="true">
+          {visibleFiles.map((file) => (
+            <span key={file}>{file}</span>
           ))}
         </div>
-
-        <div className="board" aria-label="Chessboard">
-          {displayRows.map(({ piece, square, row, col }) => {
-            const isLegal = legalSquares.includes(square);
-            const isSelected = selected === square;
-            const squareColor = (row + col) % 2 === 0 ? "light" : "dark";
-
-            return (
-              <button
-                type="button"
-                key={square}
-                className={`square ${squareColor} ${
-                  isSelected ? "selected" : ""
-                } ${isLegal ? "legal" : ""}`}
-                onClick={() => handleSquareClick(square, piece)}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={(event) => handleDrop(event, square)}
-                disabled={loading || busy}
-                aria-label={`${square}${piece ? ` ${piece}` : " empty"}`}
-              >
-                {piece && (
-                  <span
-                    className={`piece ${
-                      isWhitePiece(piece) ? "white-piece" : "black-piece"
-                    }`}
-                    draggable={
-                      !loading && !busy && sideForPiece(piece) === turn
-                    }
-                    onDragStart={(event) =>
-                      handleDragStart(event, square, piece)
-                    }
-                    aria-hidden="true"
-                  >
-                    {PIECES[piece]}
-                  </span>
-                )}
-
-                {isLegal && <span className="highlight" aria-hidden="true" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="file-labels" aria-hidden="true">
-        {visibleFiles.map((file) => (
-          <span key={file}>{file}</span>
-        ))}
-      </div>
+      </section>
     </main>
   );
 }
